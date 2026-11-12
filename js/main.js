@@ -1,0 +1,37 @@
+
+(()=>{
+ const $=q=>document.querySelector(q), $$=q=>[...document.querySelectorAll(q)];
+ const progress=$('#scrollProgress'); const setProgress=()=>{const y=window.scrollY, h=document.documentElement.scrollHeight-innerHeight;progress.style.width=(h?Math.min(100,y/h*100):0)+'%'};window.addEventListener('scroll',setProgress,{passive:true});setProgress();
+ const nav=$('#mobileMenu'),toggle=$('#mobileToggle');toggle.addEventListener('click',()=>{nav.classList.toggle('show');toggle.setAttribute('aria-expanded',nav.classList.contains('show')?'true':'false')});$$('.nav-links a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('show');toggle.setAttribute('aria-expanded','false')}));
+ const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');observer.unobserve(e.target)}}),{threshold:.08}):null;$$('.reveal').forEach(el=>observer?observer.observe(el):el.classList.add('in'));
+ let sessionMode='ip',numSessions=6;
+ const destinations=['ERP','Cloud','Banking'],source=['PC-A','PC-B'];
+ function sessionWan(i){const src=Math.floor(i/3)%2; const dest=i%3;return sessionMode==='session'?(i%2)+1:((src+dest)%2)+1}
+ function renderSessions(){const s=[];let w1=0,w2=0;for(let i=0;i<numSessions;i++){let wan=sessionWan(i);if(wan===1)w1++;else w2++;s.push('<div class="session-row"><span><b>#'+String(i+1).padStart(2,'0')+'</b> · '+source[Math.floor(i/3)%2]+' → '+destinations[i%3]+'</span><span class="badge-wan '+(wan===2?'w2':'')+'">WAN'+wan+'</span></div>')};$('#sessionList').innerHTML=s.join('');$('#wan1Count').textContent=w1;$('#wan2Count').textContent=w2;$('#wan1Bar').style.width=(w1/numSessions*100)+'%';$('#wan2Bar').style.width=(w2/numSessions*100)+'%';$('#modeInfo').textContent=sessionMode==='ip'?'IP-Based: Session cùng cặp IP nguồn/đích được minh họa trên cùng WAN.':'Session-Based: Các session mới có thể được phân phối giữa những WAN.';$('#ipBtn').classList.toggle('active',sessionMode==='ip');$('#sessionBtn').classList.toggle('active',sessionMode==='session');$('#ipBtn').setAttribute('aria-pressed',sessionMode==='ip');$('#sessionBtn').setAttribute('aria-pressed',sessionMode==='session');}
+ $('#ipBtn').addEventListener('click',()=>{sessionMode='ip';renderSessions()});$('#sessionBtn').addEventListener('click',()=>{sessionMode='session';renderSessions()});$('#addSession').addEventListener('click',()=>{numSessions=Math.min(numSessions+6,30);renderSessions()});$('#resetSession').addEventListener('click',()=>{numSessions=6;renderSessions()});renderSessions();
+ function updateSLA(){let lat=Number($('#latRange').value),jit=Number($('#jitRange').value),loss=Number($('#lossRange').value),ok=lat<=80&&jit<=30&&loss<=2;$('#latVal').textContent=lat+' ms';$('#jitVal').textContent=jit+' ms';$('#lossVal').textContent=loss.toFixed(1)+'%';$('#slaStatus').textContent=ok?'SLA PASSED':'SLA FAILED';$('#slaStatus').classList.toggle('invalid',!ok);$('#slaCircle').textContent=ok?'✓':'!';$('#slaCircle').classList.toggle('invalid',!ok);$('#slaResultTitle').textContent=ok?'WAN1 đạt điều kiện mô phỏng':'WAN1 không đạt điều kiện SLA';$('#slaResultText').textContent=ok?'WAN1 đủ điều kiện tham gia nhóm cân bằng tải.':'WAN1 vẫn Connected nhưng không đạt SLA, nên bị loại khỏi Pool trong mô hình minh họa.';let p=$('#wan1Eligibility');p.classList.toggle('is-bad',!ok);p.classList.toggle('is-good',ok);p.querySelector('span').textContent=ok?'Trong nhóm LB':'Loại khỏi nhóm LB';}
+ ['#latRange','#jitRange','#lossRange'].forEach(id=>$(id).addEventListener('input',updateSLA));$('#slaBadPreset').addEventListener('click',()=>{$('#latRange').value=148;$('#jitRange').value=45;$('#lossRange').value=3.6;updateSLA()});$('#slaReset').addEventListener('click',()=>{$('#latRange').value=32;$('#jitRange').value=8;$('#lossRange').value=.4;updateSLA()});updateSLA();
+ const services={staff:{name:'VLAN10 · Nhân viên',desc:'ERP, email và truy cập Internet',wans:[1,2],labels:['POOL','POOL','—'],html:'<strong>Nhóm nhân viên:</strong> WAN1 + WAN2, có thể lựa chọn IP-Based theo yêu cầu ứng dụng.'},guest:{name:'VLAN30 · Wi-Fi khách',desc:'Truy cập web và giải trí',wans:[2,3],labels:['—','POOL','POOL'],html:'<strong>Wi-Fi khách:</strong> WAN2 + WAN3, mô hình phân phối session giữa các WAN được phép.'},server:{name:'VLAN40 · Server',desc:'Dịch vụ cần Public IP ổn định',wans:[1],labels:['CỐ ĐỊNH','—','—'],html:'<strong>Nhóm server:</strong> Cố định WAN1 để giữ Public IP theo yêu cầu truy cập từ xa / whitelist.'},backup:{name:'Dịch vụ Backup',desc:'Đồng bộ và tải dữ liệu nhiều luồng',wans:[1,2,3],labels:['POOL','POOL','POOL'],html:'<strong>Backup / Download:</strong> Có thể thiết kế khai thác nhiều WAN bằng nhiều session, không cộng băng thông cho một luồng đơn.'}};
+ function setService(key){const obj=services[key];$$('[data-service]').forEach(b=>{const yes=b.dataset.service===key;b.classList.toggle('active',yes);b.setAttribute('aria-pressed',yes)});$('#poolServiceTitle').textContent=obj.name;$('#poolServiceDesc').textContent=obj.desc;$('#poolExplanation').innerHTML=obj.html;$$('[data-wan]').forEach((n,i)=>{n.classList.toggle('active',obj.wans.includes(i+1));$('#wanLabel'+(i+1)).textContent=obj.labels[i]})};$$('[data-service]').forEach(b=>b.addEventListener('click',()=>setService(b.dataset.service)));setService('staff');
+ // Stage 4 policy routing simulator
+ const policies={
+  banking:{name:'Banking / ERP → WAN1',desc:'Giữ đường ra WAN1 để phù hợp dịch vụ cần Public IP nhất quán hoặc whitelist IP.',source:'Ứng dụng ngân hàng',target:'WAN1'},
+  backup:{name:'Backup / Download → WAN1 + WAN2',desc:'Phân phối các session mới theo cấu hình để khai thác nhiều WAN, không cộng một luồng TCP.',source:'Backup nhiều phiên',target:'WAN1 / WAN2'},
+  guest:{name:'Guest Wi-Fi → WAN2',desc:'Định tuyến một nhóm người dùng/SSID qua WAN riêng, tách khỏi traffic nhân viên.',source:'Guest VLAN30',target:'WAN2'},
+  game:{name:'Game / Video Call → WAN1, dự phòng WAN2',desc:'Chỉ định WAN ưu tiên cho ứng dụng. Khi cần xét latency/jitter/loss, kết hợp SLA Policy Route.',source:'Traffic nhạy cảm',target:'WAN1 → WAN2'}
+ };
+ $$('[data-policy]').forEach(b=>b.addEventListener('click',()=>{
+  const p=policies[b.dataset.policy];$$('[data-policy]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});
+  $('#policyResultName').textContent=p.name;$('#policyResultText').textContent=p.desc;$('#policySource').textContent=p.source;$('#policyTarget').textContent=p.target;
+ }));
+ const slaProfiles={call:{lat:60,jit:15,loss:1},erp:{lat:100,jit:30,loss:2},download:{lat:150,jit:50,loss:5}};
+ let selectedProfile='call';
+ function updateSlaRoute(){const t=slaProfiles[selectedProfile],bad=$('#policyWanPoor').checked;
+   $('#policySlaMetrics').textContent='Latency ≤ '+t.lat+' ms · Jitter ≤ '+t.jit+' ms · Loss ≤ '+t.loss+'%';
+   $('#policySlaDecision').textContent=bad?'WAN1 không đạt SLA → xét WAN2':'Đang ưu tiên WAN1';
+   $('.policy-decision').classList.toggle('is-fallback',bad);
+ }
+ $$('[data-sla-service]').forEach(b=>b.addEventListener('click',()=>{selectedProfile=b.dataset.slaService;$$('[data-sla-service]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});updateSlaRoute()}));
+ $('#policyWanPoor').addEventListener('change',updateSlaRoute);updateSlaRoute();
+ // Respect reduced-motion preference for reveal transitions.
+})();
