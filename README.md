@@ -1,61 +1,65 @@
-# DrayTek Load Balancing — Không Chỉ Là Cân Bằng Tải
+# DrayTek Load Balancing – Không Chỉ Là Cân Bằng Tải
 
-## Triển khai
+Bản phát hành: **v2.1 (SEO + Google Form)** – ngày 12/11/2026.
 
-1. Giải nén vào thư mục website hoặc repository GitHub Pages.
-2. Đảm bảo `index.html`, `css/`, `js/`, `images/` ở cùng cấp.
-3. Mở `index.html` trực tiếp bằng trình duyệt hoặc bật GitHub Pages từ branch chứa thư mục.
-4. Website chỉ dùng HTML/CSS/JavaScript; không yêu cầu server, API, cơ sở dữ liệu hay bước build.
+## 1. Triển khai ngay trên GitHub Pages
 
-## Các mô phỏng tương tác
+1. Giải nén ZIP. Tải các file/thư mục trong gốc ZIP lên **root** của repository GitHub, không tải nguyên ZIP lên.
+2. Trong repository: **Settings → Pages → Build and deployment → Deploy from a branch**; chọn nhánh `main`, thư mục `/ (root)`.
+3. Đợi GitHub Pages xuất bản và mở URL GitHub Pages để kiểm tra toàn bộ hình, các demo JavaScript và CTA.
+4. Trang `index.html` sử dụng đường dẫn tương đối, hoạt động với GitHub Pages ở thư mục gốc hoặc `/repository/`.
 
-- IP-Based vs Session-Based: chuyển chế độ, sinh thêm session, theo dõi phân phối WAN.
-- SLA Load Balancing: thay đổi latency/jitter/packet loss, chuyển trạng thái WAN1 trong LB Pool.
-- Policy Route: chọn Banking, Backup, Guest, Game để xem cách chọn path.
-- SLA Policy Route: chọn profile dịch vụ, mô phỏng WAN1 không đạt SLA và Primary/Secondary path.
-- WAN Pool: chuyển nhóm Nhân viên/Khách/Server/Backup để đổi danh sách WAN.
-- Mobile menu, FAQ accordion, animation theo scroll.
+## 2. Google Form – đã cập nhật
 
-## Hình ảnh
+Toàn bộ CTA **tư vấn/báo giá** tại header, Hero và cuối trang đã liên kết tới:
 
-- 10 hình đã duyệt đặt trong `images/illustrations/01-...webp` tới `10-...webp`.
-- Ảnh thiết bị giữ trong `images/products/` theo bản chụp do AN PHÁT cung cấp.
-- Logo trong `images/brand/anphat.png`; favicon cắt tỷ lệ từ logo gốc trong `images/brand/favicon.png`.
+https://docs.google.com/forms/d/e/1FAIpQLScSM56ZVHF-ZzfcVAm9LuB1AHoc5-35wcTRRTK-Qw1XIHQ1vQ/viewform
 
-## Thông tin cần biết trước khi phát hành
+Nút xem mô phỏng, điều hướng nội dung và link hướng dẫn kỹ thuật vẫn giữ chức năng ban đầu. Website không gửi dữ liệu cá nhân về máy chủ riêng.
 
-- Mô phỏng minh họa nguyên lý định tuyến và chỉ dùng dữ liệu giả lập; không điều khiển router thật.
-- Ngưỡng SLA trong demo không phải ngưỡng mặc định sản phẩm.
-- 'WAN Pool' là cách giải thích nhóm WAN được phép dùng, không đồng nghĩa một tên menu mặc định trên DrayOS 5.
-- Luồng TCP đơn lẻ không được 'bonding' qua 2 WAN trong IP/Session-based Load Balancing.
-- Chuyển WAN có thể làm thay đổi Public IP và ảnh hưởng các session đang hoạt động.
-- Trước khi chạy quảng cáo chính thức, xác nhận tên model, firmware và chi tiết tính năng hỗ trợ thực tế.
-- CTA hiện tại: mailto:sales@anphat.vn và trang liên hệ chính thức của AN PHÁT. Có thể thay bằng Google Form chiến dịch khi bạn cung cấp đường dẫn riêng.
-- Web font Be Vietnam Pro tải từ Google Fonts khi có mạng; hệ thống có fallback font.
+## 3. SEO cho domain chính thức (quan trọng)
 
-## Nguồn kỹ thuật chính
+Đã bổ sung tiêu đề SEO, description, Open Graph, Twitter Card, ảnh social 1200×630, structured data, robot meta, favicon và tối ưu semantic HTML.
 
-- https://www.anphat.vn/internet-iptv-wan-lan-nat-port-co-ban/drayos-5-cau-hinh-load-balacing-nhieu-duong-truyen-internet
-- https://www.anphat.vn/can-bang-tai-load-balancing-drayos5/drayos-5-tu-dong-loai-bo-wan-khong-dat-sla-ra-khoi-lb-pool
-- https://www.anphat.vn/can-bang-tai-load-balancing-drayos5/drayos-5-huong-dan-dinh-tuyen-dich-vu-policy-route-theo-sla
-- https://www.anphat.vn/can-bang-tai-load-balancing-drayos5/drayos-5-huong-dan-dinh-tuyen-dich-vu-theo-ip/-port/-domain
+**Bạn chưa cung cấp URL triển khai chính thức** nên bản ZIP *không cố ý thêm canonical trỏ tới domain bất kỳ*. Khi đã có URL công khai, chạy lệnh sau **trước khi commit**:
 
-## File dự án
+```bash
+python tools/configure_seo.py --site-url https://TEN-USER.github.io/TEN-REPO/
+```
 
-- `index.html`: toàn bộ nội dung, SEO, social metadata.
-- `css/style.css`: giao diện và responsive.
-- `js/main.js`: mô phỏng và tương tác.
-- `images/`: toàn bộ hình minh họa và ảnh sản phẩm.
+Hoặc nếu chạy domain riêng:
 
-## Công việc Giai đoạn 5 sau khi duyệt
+```bash
+python tools/configure_seo.py --site-url https://landing.yourdomain.vn/
+```
 
-- Đối chiếu SEO title/description theo URL GitHub Pages hoặc domain xuất bản.
-- Sau khi chọn URL thật, đổi `og:image` thành URL tuyệt đối để mạng xã hội tạo preview chính xác.
-- Xác nhận đường dẫn Google Form hoặc đầu mối nhận báo giá của chiến dịch và thay CTA nếu cần.
-- Kiểm tra thực tế trên GitHub Pages và các trình duyệt/thiết bị người dùng mục tiêu.
+Lệnh cập nhật **canonical, og:url, og:image (absolute URL), twitter:image, JSON-LD WebPage URL** và tạo `sitemap.xml` chính xác. Sau đó tải/commit lại `index.html`, `robots.txt`, `sitemap.xml`.
 
+Không nhập domain giả ví dụ vào sản phẩm đang chạy. Nếu chưa biết URL cuối, bạn có thể triển khai bình thường, nhưng social preview và canonical nên được hoàn thiện sau bằng lệnh này. Đây là khuyến nghị phù hợp với Google Search Central về canonical và sitemap URL tuyệt đối.
 
-## Cập nhật bản Deploy v2
-- Tích hợp bộ hình chính thức đã duyệt.
-- Tăng kích thước chữ tại các khu vực nhỏ.
-- Tăng tỷ trọng màu đỏ DrayTek trong tiêu đề, nhãn nhấn và CTA.
+**Lưu ý:** Với GitHub Pages dạng `/REPO/`, `robots.txt` trong repo không thay thế được `robots.txt` ở root của `username.github.io`; `sitemap.xml` vẫn có thể gửi URL trực tiếp trong Google Search Console.
+
+## 4. Thư mục
+
+```text
+index.html                 Landing Page (10 khu vực, mô phỏng tương tác)
+css/style.css              UI/UX AN PHÁT + nhấn đỏ DrayTek
+js/main.js                 Các demo IP/Session, SLA, Policy, WAN Pool
+images/illustrations/     10 minh họa chính thức dạng WebP
+images/products/          Ảnh gốc ba router
+images/brand/             Logo, favicon
+images/social/            Ảnh Open Graph 1200×630
+robots.txt                Cho phép lập chỉ mục
+sitemap.xml               Được tạo khi biết URL chính thức
+tools/configure_seo.py     Công cụ gắn canonical/social/structured data
+```
+
+## 5. Kiểm tra sau triển khai
+
+- Xem trên desktop/mobile (375 px, 768 px, 1440 px).
+- Kiểm tra bốn mô phỏng hoạt động và không có lỗi trong Console.
+- Kiểm tra CTA ở nav/Hero/Footer đều mở Google Form.
+- Kiểm tra ảnh WebP và ảnh social hiển thị đầy đủ.
+- Khi đã điền URL chính thức: xem source HTML để kiểm tra canonical và og:image tuyệt đối; submit sitemap trong Search Console.
+
+*Ghi chú:* Mô phỏng kỹ thuật dùng cho giải thích nguyên lý, không thay thế việc xác thực tính năng trên firmware/model DrayTek thực tế.
